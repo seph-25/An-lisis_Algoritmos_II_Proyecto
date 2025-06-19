@@ -2,6 +2,7 @@ public class BacktrackingSolver {
     private int solutionsFound;
     private int assignments;
     private int comparisons;
+    private int prunningCounter = 0;
 
     public BacktrackingSolver() {
         resetMetrics();
@@ -11,6 +12,7 @@ public class BacktrackingSolver {
         this.solutionsFound = 0;
         this.assignments    = 0;
         this.comparisons    = 0;
+        this.prunningCounter = 0;
     }
 
     public boolean solve(Board board) {
@@ -43,7 +45,7 @@ public class BacktrackingSolver {
     public int getSolutionsFound() { return solutionsFound; }
     public int getAssignments()    { return assignments; }
     public int getComparisons()    { return comparisons; }
-    
+
     public String getMetrics() {
         return String.format(
                 "Soluciones encontradas: %d, Asignaciones: %d, Comparaciones: %d",
