@@ -1,10 +1,5 @@
 import java.util.*;
 
-/**
- * Resuelve el problema de las N-Reinas usando un Algoritmo Genético.
- * Esta versión incluye correcciones críticas en la mutación y la
- * implementación de elitismo para asegurar la convergencia.
- */
 public class GeneticSolver {
     // Parámetros configurables para mayor flexibilidad
     private final int n;

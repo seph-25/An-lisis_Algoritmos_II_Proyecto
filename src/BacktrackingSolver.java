@@ -36,6 +36,7 @@ public class BacktrackingSolver {
             if (solveRow(board, row + 1)) {
                 return true;
             }
+            prunningCounter++;
             board.removeQueen(row);
         }
         return false;
@@ -48,8 +49,8 @@ public class BacktrackingSolver {
 
     public String getMetrics() {
         return String.format(
-                "Soluciones encontradas: %d, Asignaciones: %d, Comparaciones: %d",
-                solutionsFound, assignments, comparisons
+                "Soluciones encontradas: %d, Asignaciones: %d, Comparaciones: %d, Podas: %d",
+                solutionsFound, assignments, comparisons,prunningCounter
         );
     }
 }

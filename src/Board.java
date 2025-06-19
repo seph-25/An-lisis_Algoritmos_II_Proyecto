@@ -1,10 +1,10 @@
 public class Board {
-    private int[] queens; // queens[i] = columna de la reina en la fila i
+    private final int[] queens; // queens[i] = columna de la reina en la fila i
 
     public Board(int n) {
         this.queens = new int[n];
         for (int i = 0; i < n; i++) {
-            queens[i] = -1; // -1 indica que no hay reina en la fila i
+            queens[i] = -1;
         }
     }
 
@@ -29,9 +29,9 @@ public class Board {
     }
 
     public boolean isSafe(int row, int col) {
-        for (int i = 0; i < row; i++) {
-            int qCol = queens[i];
-            if (qCol == col || Math.abs(qCol - col) == Math.abs(i - row)) {
+        for (int position = 0; position < row; position++) {
+            int qCol = queens[position];
+            if (qCol == col || Math.abs(qCol - col) == Math.abs(position - row)) {
                 return false;
             }
         }
