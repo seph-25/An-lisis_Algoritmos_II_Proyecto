@@ -1,37 +1,53 @@
 public class BacktrackingSolver {
-    private int solutionsFound = 0;
-    private int assignments = 0;
-    private int comparisons = 0;
+    private int solutionsFound;
+    private int assignments;
+    private int comparisons;
 
-    public boolean solve(Board board, int row) {
+    public BacktrackingSolver() {
+        resetMetrics();
+    }
+
+    private void resetMetrics() {
+        this.solutionsFound = 0;
+        this.assignments    = 0;
+        this.comparisons    = 0;
+    }
+
+    public boolean solve(Board board) {
+        resetMetrics();
+        return solveRow(board, 0);
+    }
+
+    private boolean solveRow(Board board, int row) {
         int n = board.size();
         if (row == n) {
             solutionsFound++;
-            return true; // Si solo quieres una solución, retorna aquí
+            return true;
         }
         for (int col = 0; col < n; col++) {
             comparisons++;
-            if (board.isSafe(row, col)) {
-                board.setQueen(row, col);
-                assignments++;
-                if (solve(board, row + 1)) {
-                    return true; // Si solo quieres una solución, retorna aquí
-                }
-                board.removeQueen(row);
+            if (!board.isSafe(row, col)) {
+                continue;
             }
+            board.setQueen(row, col);
+            assignments++;
+            if (solveRow(board, row + 1)) {
+                return true;
+            }
+            board.removeQueen(row);
         }
         return false;
     }
 
-    public int getAssignments() {
-        return assignments;
-    }
-
-    public int getComparisons() {
-        return comparisons;
-    }
-
-    public int getSolutionsFound() {
-        return solutionsFound;
+    // Getters para usar después en Main o donde necesites
+    public int getSolutionsFound() { return solutionsFound; }
+    public int getAssignments()    { return assignments; }
+    public int getComparisons()    { return comparisons; }
+    
+    public String getMetrics() {
+        return String.format(
+                "Soluciones encontradas: %d, Asignaciones: %d, Comparaciones: %d",
+                solutionsFound, assignments, comparisons
+        );
     }
 }

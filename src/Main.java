@@ -1,16 +1,16 @@
 public class Main {
     public static void main(String[] args) {
-        int n = 5; // Cambia el tamaño según lo necesites
-
-        // Backtracking
+        int n = 8;
         Board board = new Board(n);
-        BacktrackingSolver backSolver = new BacktrackingSolver();
-        if (backSolver.solve(board, 0)) {
-            System.out.println("Solución Backtracking:");
+        BacktrackingSolver solver = new BacktrackingSolver();
+
+        boolean found = solver.solve(board);
+        System.out.println("¿Solución encontrada? " + found);
+        if (found) {
             board.printBoard();
-        } else {
-            System.out.println("No hay solución.");
         }
+        // Aquí usamos todas las métricas y el metodo auxiliar
+        System.out.println(solver.getMetrics());
 
         //Genético
         int populationSize = 150;
