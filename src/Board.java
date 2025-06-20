@@ -29,13 +29,14 @@ public class Board {
     }
 
     public boolean isSafe(int row, int column,Counters counters) {
-        counters.manualBits++;
+        counters.manualBits+=(Integer.SIZE*2);/*32 bit de int row y de otros 32 de int column (no se cuenta la referencia al objeto counters, ya que es para medición)*/
+        counters.manualBits+=Integer.SIZE;/* 32 bits de int position del for*/
         for (int position = 0; position < row; position++) {
 
             counters.comparisons++;/* cada comparación true del for */
 
             int queenColumn = queens[position];
-            counters.manualBits++;
+            counters.manualBits+=Integer.SIZE;/* 32 bits de int queenColumn */
             counters.assignments++;
 
             if (queenColumn == column || Math.abs(queenColumn - column) == Math.abs(position - row)) {

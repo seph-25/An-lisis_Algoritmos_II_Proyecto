@@ -14,25 +14,24 @@ public class BacktrackingSolver {
 
     public boolean solve(Board board) {
         resetMetrics();
-        boolean found = solveRow(board, 0);
 
         // Cálculo manual de memoria:
-        int n = board.size();
-        int bitsBoard    = Integer.SIZE * n;       // 32·N
-        //int bitsStack    = Integer.SIZE * 3 * n;   // (row, n, col) × N
-        //int bitsIsSafe   = Integer.SIZE * 4 * n;       // (row, col, position, qCol)
-        counters.manualBits = bitsBoard; // + bitsStack + bitsIsSafe;
-        return found;
+        int n = board.size();/*Esta variable es de medición por eso no se suma a manualBits*/
+        int bitsBoard    = Integer.SIZE * n;       /*Tamaño del arreglo queens, 32*n */
+        //counters.manualBits = bitsBoard; // + bitsStack + bitsIsSafe;
+
+        return solveRow(board, 0);
     }
 
     private boolean solveRow(Board board, int row) {
+        counters.manualBits+=Integer.SIZE+32;/*32 bits de int row y 32 de referencia a board*/
         int n = board.size();
-        counters.manualBits+=Integer.SIZE;
+        counters.manualBits+=Integer.SIZE;/*32 bits de int n*/
         counters.assignments++;/* int n = board.size(); */
         if (row == n) {
             return true;
         }counters.comparisons++;/* if (row == n) */
-        counters.manualBits++;
+        counters.manualBits++;/*32 bits de int column dentro del for*/
         for (int column = 0; column < n; column++) {
             counters.comparisons++; /* column < n cada que entra al ciclo*/
 
@@ -63,7 +62,7 @@ public class BacktrackingSolver {
                 "Asignaciones: %d%n" +
                 "Comparaciones: %d%n" +
                 "Podas: %d%n"+
-                "Memoria de variables: %d bits (%d Bytes)",
+                "Memoria de variables: %d bits (%d bytes)",
                 totalInstructions,
                 counters.assignments,
                 counters.comparisons,

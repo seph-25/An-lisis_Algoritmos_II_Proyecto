@@ -2,7 +2,7 @@
 public class GeneticCore {
 
     public GeneticCore(int n){
-        TimeMemoryProfilerResource profiler = new TimeMemoryProfilerResource();
+        TimeMeter profiler = new TimeMeter();
         GeneticsParams geneticsParams = new GeneticsParams(
                 30,
                 60,

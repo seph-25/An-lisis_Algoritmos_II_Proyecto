@@ -3,7 +3,7 @@ import java.util.Arrays;
 
 public class BacktrackingCore {
     public BacktrackingCore(int n){
-        TimeMemoryProfilerResource profiler = new TimeMemoryProfilerResource();
+        TimeMeter profiler = new TimeMeter();
         Board board = new Board(n);
 
         profiler.start();
@@ -21,7 +21,7 @@ public class BacktrackingCore {
             System.out.println(MessageFormat.format("No existe solución para un tablero de {0}x{0} con {0} reinas.",n));
         }
 
-        System.out.println(Arrays.toString(board.getQueens()));
+        System.out.println("Posición de columna de reina según su fila:\n" + Arrays.toString(board.getQueens()));
         System.out.println(solver.getMetrics());
         profiler.printReport();
     }
