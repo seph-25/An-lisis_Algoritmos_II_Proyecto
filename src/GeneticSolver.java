@@ -1,7 +1,6 @@
 import java.util.*;
 
 public class GeneticSolver {
-    // Parámetros configurables para mayor flexibilidad
     private final int n;
     private final int populationSize;
     private final int generations;
@@ -26,11 +25,9 @@ public class GeneticSolver {
         List<QueenChromosome> population = initializePopulation();
 
         for (int gen = 0; gen < generations; gen++) {
-            // Ordenar la población por fitness (el mejor primero)
-            Collections.sort(population);
+            Collections.sort(population);// Ordenar la población por fitness (el mejor primero)
 
-            // Condición de parada: si encontramos una solución perfecta, terminamos.
-            if (population.get(0).getFitness() == 0) {
+            if (population.get(0).getFitness() == 0) {// Condición de parada: si encontramos una solución perfecta, terminamos.
                 System.out.println("Solución encontrada en la generación: " + gen);
                 return population.get(0);
             }
@@ -38,8 +35,7 @@ public class GeneticSolver {
             population = createNextGeneration(population);
         }
 
-        // Si no se encontró solución perfecta, devolver la mejor encontrada
-        Collections.sort(population);
+        Collections.sort(population);// Si no se encontró solución perfecta, devolver la mejor encontrada
         return population.get(0);
     }
 

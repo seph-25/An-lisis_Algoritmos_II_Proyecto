@@ -3,10 +3,15 @@ import java.util.Arrays;
 
 public class BacktrackingCore {
     public BacktrackingCore(int n){
-
+        TimeMemoryProfilerResource profiler = new TimeMemoryProfilerResource();
         Board board = new Board(n);
+
+        profiler.start();
+
         BacktrackingSolver solver = new BacktrackingSolver();
         boolean found = solver.solve(board);
+
+        profiler.stop();
 
         if (found) {
             System.out.println("Solución encontrada: ");
@@ -18,5 +23,6 @@ public class BacktrackingCore {
 
         System.out.println(Arrays.toString(board.getQueens()));
         System.out.println(solver.getMetrics());
+        profiler.printReport();
     }
 }

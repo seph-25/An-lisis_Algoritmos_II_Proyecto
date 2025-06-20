@@ -28,20 +28,29 @@ public class Board {
         queens[row] = -1;
     }
 
-    public boolean isSafe(int row, int col) {
+    public boolean isSafe(int row, int column,Counters counters) {
+        counters.manualBits++;
         for (int position = 0; position < row; position++) {
-            int qCol = queens[position];
-            if (qCol == col || Math.abs(qCol - col) == Math.abs(position - row)) {
+
+            counters.comparisons++;/* cada comparación true del for */
+
+            int queenColumn = queens[position];
+            counters.manualBits++;
+            counters.assignments++;
+
+            if (queenColumn == column || Math.abs(queenColumn - column) == Math.abs(position - row)) {
+                counters.prunningCounter++;
                 return false;
-            }
-        }
+            }counters.comparisons+=3;/* 1.queenColumn == column 2.Math.abs(queenColumn - column) == Math.abs(position - row)) 3.(1. || 2.)    */
+        }counters.assignments++;/*int position = 0 del for*/
+        counters.comparisons++;/*comparación false del for*/
         return true;
     }
 
     public void printBoard() {
         for (int row = 0; row < size(); row++) {
-            for (int col = 0; col < size(); col++) {
-                System.out.print(queens[row] == col ? "Q " : ". ");
+            for (int column = 0; column < size(); column++) {
+                System.out.print(queens[row] == column ? "♕ " : "▯ ");
             }
             System.out.println();
         }
