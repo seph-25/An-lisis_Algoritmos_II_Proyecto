@@ -6,19 +6,25 @@ public class GeneticSolver {
     private final int generations;
     private final double mutationRate;
     private final int elitismCount;
+    private final int crossoverType;
+    private final int mutationType;
 
     public GeneticSolver(
             int n,
             int populationSize,
             int generations,
             double mutationRate,
-            int elitismCount
+            int elitismCount,
+            int crossoverType,
+            int mutationType
     ) {
         this.n = n;
         this.populationSize = populationSize;
         this.generations = generations;
         this.mutationRate = mutationRate;
         this.elitismCount = elitismCount;
+        this.crossoverType = crossoverType;
+        this.mutationType = mutationType;
     }
 
     public QueenChromosome solve() {
@@ -39,9 +45,7 @@ public class GeneticSolver {
         return population.get(0);
     }
 
-    private List<QueenChromosome> createNextGeneration(
-            List<QueenChromosome> currentPopulation
-    ) {
+    private List<QueenChromosome> createNextGeneration(List<QueenChromosome> currentPopulation) {
         List<QueenChromosome> newPopulation = new ArrayList<>();
 
         // --- IMPLEMENTACIÓN DE ELITISMO ---
@@ -63,10 +67,26 @@ public class GeneticSolver {
         return newPopulation;
     }
 
+    /**
+     * Inicializar población y evitar cromosomas duplicados en la población inicial.
+     */
     private List<QueenChromosome> initializePopulation() {
         List<QueenChromosome> population = new ArrayList<>();
-        for (int i = 0; i < this.populationSize; i++) {
-            population.add(new QueenChromosome(n));
+        Set<String> seen = new HashSet<>();
+        int attempts = 0;
+        while (population.size() < this.populationSize) {
+            QueenChromosome candidate = new QueenChromosome(n);
+            String key = Arrays.toString(candidate.getGenes());
+            if (!seen.contains(key)) {
+                population.add(candidate);
+                seen.add(key);
+            }
+            // Evitar bucle infinito si la población es muy grande para N pequeño
+            attempts++;
+            if (attempts > this.populationSize * 100) {
+                System.out.println("Advertencia: No se pudo generar una población inicial completamente única.");
+                break;
+            }
         }
         return population;
     }
@@ -83,8 +103,7 @@ public class GeneticSolver {
         return Collections.max(tournament);
     }
 
-    private QueenChromosome crossover(QueenChromosome p1, QueenChromosome p2) {
-        // Cruce de un solo punto (genera un solo hijo)
+    private QueenChromosome crossoverOnePoint(QueenChromosome p1, QueenChromosome p2) {
         int[] parent1Genes = p1.getGenes();
         int[] parent2Genes = p2.getGenes();
         int[] childGenes = new int[n];
@@ -101,17 +120,78 @@ public class GeneticSolver {
         return new QueenChromosome(childGenes);
     }
 
-    // --- CORRECCIÓN DE MUTACIÓN ---
+    private QueenChromosome crossoverUniform(QueenChromosome p1, QueenChromosome p2) {
+        int[] parent1Genes = p1.getGenes();
+        int[] parent2Genes = p2.getGenes();
+        int[] childGenes = new int[n];
+        Random rand = new Random();
+
+        for (int i = 0; i < n; i++) {
+            if (rand.nextBoolean()) {
+                childGenes[i] = parent1Genes[i];
+            } else {
+                childGenes[i] = parent2Genes[i];
+            }
+        }
+        return new QueenChromosome(childGenes);
+    }
+
+    private QueenChromosome crossover(QueenChromosome p1, QueenChromosome p2) {
+        if (crossoverType == 1) {
+            return crossoverOnePoint(p1, p2);
+        } else {
+            return crossoverUniform(p1, p2);
+        }
+    }
+
     private void mutate(QueenChromosome chromosome) {
         Random rand = new Random();
-        // La mutación solo ocurre si se cumple la probabilidad
         if (rand.nextDouble() < this.mutationRate) {
-            int row = rand.nextInt(n);
-            int col = rand.nextInt(n);
-            int[] genes = chromosome.getGenes();
-            genes[row] = col;
-            // Se utiliza el nuevo método para modificar el cromosoma y recalcular su fitness
+            if (mutationType == 1) {
+                mutateRandom(chromosome);
+            } else {
+                mutateSwapIfBetter(chromosome);
+            }
+        }
+    }
+
+    private void mutateRandom(QueenChromosome chromosome) {
+        Random rand = new Random();
+        int row = rand.nextInt(n);
+        int col = rand.nextInt(n);
+        int[] genes = chromosome.getGenes();
+        int oldValue = genes[row];
+        genes[row] = col;
+        chromosome.setGenes(genes);
+        // Si no mejora el fitness, revierte
+        if (chromosome.getFitness() < 0) { // fitness negativo es peor
+            genes[row] = oldValue;
             chromosome.setGenes(genes);
         }
     }
+
+    private void mutateSwapIfBetter(QueenChromosome chromosome) {
+        Random rand = new Random();
+        int[] genes = chromosome.getGenes();
+        int i = rand.nextInt(n);
+        int j = rand.nextInt(n);
+        while (j == i) j = rand.nextInt(n);
+
+        int oldFitness = chromosome.getFitness();
+        // Intercambia dos posiciones
+        int temp = genes[i];
+        genes[i] = genes[j];
+        genes[j] = temp;
+        chromosome.setGenes(genes);
+
+        // Solo aplica si mejora el fitness
+        if (chromosome.getFitness() < oldFitness) {
+            // Si no mejora, revierte
+            temp = genes[i];
+            genes[i] = genes[j];
+            genes[j] = temp;
+            chromosome.setGenes(genes);
+        }
+    }
+
 }

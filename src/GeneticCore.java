@@ -1,7 +1,7 @@
 
 public class GeneticCore {
 
-    public GeneticCore(int n){
+    public GeneticCore(int n, int crossoverType,int mutationType){
         TimeMeter profiler = new TimeMeter();
         GeneticsParams geneticsParams = new GeneticsParams(
                 30,
@@ -17,7 +17,9 @@ public class GeneticCore {
                 geneticsParams.populationSize(),
                 geneticsParams.generations(),
                 geneticsParams.mutationRate(),
-                geneticsParams.elitismCount()
+                geneticsParams.elitismCount(),
+                crossoverType,
+                mutationType
         );
         QueenChromosome best = genSolver.solve();
 

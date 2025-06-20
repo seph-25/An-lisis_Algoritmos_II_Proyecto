@@ -9,9 +9,11 @@ public class Main {
             System.out.println("Backtracking:");
             new BacktrackingCore(n);
 
+            System.out.println("\nGenético (Cruce de un punto):");
+            new GeneticCore(n, 1,1);
 
-            System.out.println("\nGenético:");
-            new GeneticCore(n);
+            System.out.println("\nGenético (Cruce uniforme):");
+            new GeneticCore(n, 2,2);
 
 
             System.out.println('\n'+String.valueOf('☰').repeat(30)+'\n');
