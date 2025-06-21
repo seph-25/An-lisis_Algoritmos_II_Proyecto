@@ -27,22 +27,23 @@ public class GeneticSolver {
         this.mutationType = mutationType;
     }
 
-    public QueenChromosome solve() {
+    public List<QueenChromosome> solve() {
         List<QueenChromosome> population = initializePopulation();
 
         for (int gen = 0; gen < generations; gen++) {
-            Collections.sort(population);// Ordenar la población por fitness (el mejor primero)
+            Collections.sort(population);
 
-            if (population.get(0).getFitness() == 0) {// Condición de parada: si encontramos una solución perfecta, terminamos.
+            if (population.get(0).getFitness() == 0) {
                 System.out.println("Solución encontrada en la generación: " + gen);
-                return population.get(0);
+                // Devuelve los 3 mejores encontrados hasta ese momento
+                return new ArrayList<>(population.subList(0, Math.min(3, population.size())));
             }
 
             population = createNextGeneration(population);
         }
 
-        Collections.sort(population);// Si no se encontró solución perfecta, devolver la mejor encontrada
-        return population.get(0);
+        Collections.sort(population);
+        return new ArrayList<>(population.subList(0, Math.min(3, population.size())));
     }
 
     private List<QueenChromosome> createNextGeneration(List<QueenChromosome> currentPopulation) {
@@ -192,6 +193,23 @@ public class GeneticSolver {
             genes[j] = temp;
             chromosome.setGenes(genes);
         }
+    }
+
+    public String getMetrics() {
+        int totalInstructions = counters.assignments + counters.comparisons;
+        return String.format(
+                "Instrucciones ejecutadas: %d%n" +
+                        "Asignaciones: %d%n" +
+                        "Comparaciones: %d%n" +
+                        "Podas: %d%n"+
+                        "Memoria de variables: %d bits (%d bytes)",
+                totalInstructions,
+                counters.assignments,
+                counters.comparisons,
+                counters.prunningCounter,
+                counters.manualBits,
+                counters.manualBits/8
+        );
     }
 
 }
