@@ -1,6 +1,3 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 
 public class GeneticSolver {
@@ -23,13 +20,14 @@ public class GeneticSolver {
             population = createNextGeneration(population);
         }
         Collections.sort(population);
+        //logCountersHeader();
         return new ArrayList<>(population.subList(0,Math.min(3,population.size())));
     }
 
     /* EXACTO número de hijos = popSize*2 */
     private List<QueenChromosome> createNextGeneration(List<QueenChromosome> curr) {
 
-        int childrenNeeded = params.childrenPerGeneration();
+        int childrenNeeded = params.offspringGenerations();
         List<QueenChromosome> children = new ArrayList<>();
 
         while (children.size() < childrenNeeded) {
@@ -77,6 +75,9 @@ public class GeneticSolver {
      * Inicializar población y evitar cromosomas duplicados en la población inicial.
      */
     private List<QueenChromosome> initializePopulation() {
+        counters.assignments += 2;                // candidate + key
+        counters.manualBits += Integer.SIZE*2;
+
         List<QueenChromosome> population = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         int attempts = 0;
@@ -180,41 +181,46 @@ public class GeneticSolver {
     }
 
     /* MUTACIÓN aleatoria con reversión si empeora */
-    private void mutateRandom(QueenChromosome chrom) {
+    private void mutateRandom(QueenChromosome chrom){
+        int[] before = chrom.getGenes();
+        int beforeFitness  = chrom.getFitness();
 
-        int before = chrom.getFitness();
+        counters.mutationCounter++;          // count mutation attempt
+        counters.assignments += 3;
+        counters.manualBits  += Integer.SIZE*3;
+
         int row = rand.nextInt(params.n_size());
         int col = rand.nextInt(params.n_size());
-        int[] g = chrom.getGenes(); int old = g[row];
-        g[row] = col;  chrom.setGenes(g);
+        int[] g  = chrom.getGenes(); int old = g[row];
+        g[row] = col; chrom.setGenes(g);
 
-        /* revierte 60 % de las veces si empeora */
-        if (chrom.getFitness() < before && rand.nextDouble() < 0.60) {
-            g[row] = old;  chrom.setGenes(g);
+        if (chrom.getFitness() < beforeFitness && rand.nextDouble() < .60){
+            g[row] = old; chrom.setGenes(g);
+        }
+        else {
+            MutationLogger.log(before,beforeFitness,chrom.getGenes(),chrom.getFitness());
         }
     }
 
-    private void mutateSwapIfBetter(QueenChromosome chromosome) {
-        int[] genes = chromosome.getGenes();
+    private void mutateSwapIfBetter(QueenChromosome c){
+        int[] before = c.getGenes(); int beforeF = c.getFitness();
+        counters.mutationCounter++;
+
         int i = rand.nextInt(params.n_size());
         int j = rand.nextInt(params.n_size());
-        while (j == i) j = rand.nextInt(params.n_size());
+        while(j==i) j = rand.nextInt(params.n_size());
 
-        int oldFitness = chromosome.getFitness();
-        // Intercambia dos posiciones
-        int temp = genes[i];
-        genes[i] = genes[j];
-        genes[j] = temp;
-        chromosome.setGenes(genes);
+        int[] g = c.getGenes();
+        int tmp = g[i]; g[i] = g[j]; g[j] = tmp;
+        c.setGenes(g);
 
-        // Solo aplica si mejora el fitness
-        if (chromosome.getFitness() < oldFitness) {
-            // Si no mejora, revierte
-            temp = genes[i];
-            genes[i] = genes[j];
-            genes[j] = temp;
-            chromosome.setGenes(genes);
+        if (c.getFitness() < beforeF){          // revert if worse
+            tmp = g[i]; g[i] = g[j]; g[j] = tmp;
+            c.setGenes(g);
+        }else{
+            MutationLogger.log(before,beforeF,c.getGenes(),c.getFitness());
         }
+
     }
 
     /*  mutación “fuerte” obligatoria (sólo se usa para romper duplicados) */
@@ -225,7 +231,6 @@ public class GeneticSolver {
         c.setGenes(c.getGenes());          // recalcula fitness
     }
 
-    /* util */
     private boolean containsGenes(List<QueenChromosome> list, QueenChromosome q){
         String key = Arrays.toString(q.getGenes());
         for (QueenChromosome x : list)
@@ -235,21 +240,19 @@ public class GeneticSolver {
     }
 
     public String getMetrics() {
-//        int totalInstructions = counters.assignments + counters.comparisons;
-//        return String.format(
-//                "Instrucciones ejecutadas: %d%n" +
-//                        "Asignaciones: %d%n" +
-//                        "Comparaciones: %d%n" +
-//                        "Podas: %d%n"+
-//                        "Memoria de variables: %d bits (%d bytes)",
-//                totalInstructions,
-//                counters.assignments,
-//                counters.comparisons,
-//                counters.prunningCounter,
-//                counters.manualBits,
-//                counters.manualBits/8
-//        );
-        return "";
+        int totalInstructions = counters.assignments + counters.comparisons;
+        return String.format(
+                "Instrucciones ejecutadas: %d%n" +
+                "Asignaciones: %d%n" +
+                "Comparaciones: %d%n" +
+                "Mutaciones: %d%n"+
+                "Memoria de variables: %d bits (%d bytes)",
+                totalInstructions,
+                counters.assignments,
+                counters.comparisons,
+                counters.mutationCounter,
+                counters.manualBits,
+                counters.manualBits/8
+        );
     }
-
 }

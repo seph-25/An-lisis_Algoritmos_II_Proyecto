@@ -83,7 +83,7 @@ public class GeneticsParams {
         return populationSize;
     }
 
-    public int childrenPerGeneration() {
+    public int offspringGenerations() {
         return offspringGenerations;
     }
 

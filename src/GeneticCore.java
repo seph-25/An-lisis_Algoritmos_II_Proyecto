@@ -4,7 +4,7 @@ import java.util.List;
 public class GeneticCore {
 
     public GeneticCore(int n, int crossoverType,int mutationType){
-        int[] generations = new int[]{1,10,15};
+        int[] generations = new int[]{1,10,15,20};
 
         for (int gen : generations) {
             // 3 corridas requeridas
@@ -24,11 +24,13 @@ public class GeneticCore {
             System.out.println("Mejor fitness " + best.getFitness());
             new Board(best.getGenes()).printBoard();
 
-            for (int i=1;i<best3.size();i++)
-                System.out.println("Sol " + (i+1)+": "
+            for (int i=1;i<best3.size();i++) {
+                System.out.println("Sol " + (i + 1) + ": "
                         + Arrays.toString(best3.get(i).getGenes())
                         + " -> " + best3.get(i).getFitness());
-
+            }
+            //System.out.println("Posición de columna de reina según su fila:\n" + Arrays.toString(solver.getQueens()));
+            System.out.println(solver.getMetrics());
             profiler.printReport();
         }
     }
