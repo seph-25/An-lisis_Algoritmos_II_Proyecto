@@ -89,23 +89,97 @@ public class GeneticSolver {
     }
 
     private QueenChromosome[] selectParents(List<QueenChromosome> population) {
-        int tournamentSize = 5;
-        QueenChromosome parent1 = null, parent2 = null;
-        List<QueenChromosome> tournament1 = new ArrayList<>();
-        while (tournament1.size() < tournamentSize) {
-            QueenChromosome candidate = population.get(rand.nextInt(population.size()));
-            tournament1.add(candidate);
-        }
-        parent1 = Collections.min(tournament1);
+        int tournamentSize = Math.min(5, population.size());
 
+        // Mezcla la población para asegurar aleatoriedad
+        List<QueenChromosome> shuffled = new ArrayList<>(population);
+        Collections.shuffle(shuffled, rand);
+
+        // Torneo 1: selecciona el mejor de los primeros 'tournamentSize'
+        List<QueenChromosome> tournament1 = shuffled.subList(0, tournamentSize);
+        QueenChromosome parent1 = Collections.max(tournament1);
+
+        // Torneo 2: selecciona el mejor de los siguientes 'tournamentSize', excluyendo parent1
         List<QueenChromosome> tournament2 = new ArrayList<>();
-        while (tournament2.size() < tournamentSize) {
-            QueenChromosome candidate = population.get(rand.nextInt(population.size()));
-            if (!Arrays.equals(candidate.getGenes(), parent1.getGenes())) {
-                tournament2.add(candidate);
+        for (QueenChromosome c : shuffled) {
+            if (!Arrays.equals(c.getGenes(), parent1.getGenes())) {
+                tournament2.add(c);
+                if (tournament2.size() == tournamentSize) break;
             }
         }
-        parent2 = Collections.min(tournament2);
+        // Si no hay suficientes, rellena con cualquier otro distinto, o repite parent1 si no hay opción
+        if (tournament2.isEmpty()) tournament2.add(parent1);
+
+        QueenChromosome parent2 = Collections.max(tournament2);
+
+        return new QueenChromosome[]{parent1, parent2};
+    }
+
+    /*
+    ¿En qué estuve trabajando?
+
+    Estuve optimizando el metodo para seleccionar los padres para mejorar
+    la diversidad pero evitar candidatos repetidos a la hora de escoger los padres
+    y que sea robusto y evite ciclos infinitos, implementé el metodo que está abajo
+    de este comentario el cual asegura que no hayan padres duplicados, sin embargo, no
+    favorece a los mejores candidatos limitando la evolucion, el metodo de arriba de este comentario
+    fue una propuesta híbrida de mi metodo y el anterior que utilizaba torneos, parece prometer
+    robustez, diversidad y exclusividad de padres sin embargo aun no se ha probado.
+
+    Pendiente:
+    -Comprobar eficiencia de metodo selectParents
+    -Agregar medidores
+    -Documentación
+    Fecha de comentario: 24/06/2025 12:35 am muriéndome de sueño
+    */
+
+    private QueenChromosome[] selectParents(List<QueenChromosome> population) {
+        QueenChromosome parent1 = null ,parent2 = null;
+        Set<Integer> usedIndexes = new HashSet<>();
+        while (parent1 == null || parent2 == null){
+            int idx = this.rand.nextInt(population.size());
+            if (!usedIndexes.contains(idx)){
+                usedIndexes.add(idx);
+                if (parent1 == null){
+                    parent1 = population.get(idx);
+                }else {
+                    parent2 = population.get(idx);
+                    break;
+                }
+            }
+        }
+        return new QueenChromosome[]{parent1, parent2};
+    }
+
+    private QueenChromosome[] selectParent(List<QueenChromosome> population) {
+        int tournamentSize = Math.min(5, population.size());
+
+        //Torneo para e; primer padre (sin repetidos)
+        List<QueenChromosome> tournament1 = new ArrayList<>();
+        Set<Integer> usedIndexes = new HashSet<>();
+        while (tournament1.size() < tournamentSize) {
+            int idx = this.rand.nextInt(population.size());
+            if (!usedIndexes.contains(idx)){
+                tournament1.add(population.get(idx));
+                usedIndexes.add(idx);
+            }
+        }
+        QueenChromosome parent1 = Collections.min(tournament1);
+
+        tournamentSize -= 1;
+
+        //Torneo para segundo padre (sin repetidos y excluyendo el parent1)
+        List<QueenChromosome> tournament2 = new ArrayList<>();
+        usedIndexes = new HashSet<>();
+        while (tournament2.size() < tournamentSize) {
+            int idx = rand.nextInt(population.size());
+            QueenChromosome candidate = population.get(idx);
+            if (!usedIndexes.contains(idx) && !Arrays.equals(candidate.getGenes(), parent1.getGenes())) {
+                tournament2.add(candidate);
+                usedIndexes.add(idx);
+            }
+        }
+        QueenChromosome parent2 = Collections.min(tournament2);
 
         return new QueenChromosome[]{parent1, parent2};
     }

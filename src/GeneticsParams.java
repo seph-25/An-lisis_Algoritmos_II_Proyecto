@@ -21,7 +21,7 @@ public class GeneticsParams {
                 this.populationSize = 3;
                 this.generations = 6;
                 this.elitismCount = 1;
-                this.mutationRate = 0.25;
+                this.mutationRate = 0.30;//Valor optimo probado 0.50 se estanca en fitness -2
                 break;
             case 10:
                 this.populationSize = 5;
