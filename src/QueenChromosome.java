@@ -5,9 +5,9 @@ public class QueenChromosome implements Comparable<QueenChromosome> {
     private int[] genes; // genes[i] = columna de la reina en la fila i
     private int fitness;
 
-    public QueenChromosome(int n) {
+    public QueenChromosome(int n,Random rand) {
         this.genes = new int[n];
-        randomize();
+        randomize(rand);
         evaluateFitness();
     }
 
@@ -16,8 +16,7 @@ public class QueenChromosome implements Comparable<QueenChromosome> {
         evaluateFitness();
     }
 
-    public void randomize() {
-        Random rand = new Random();
+    public void randomize(Random rand) {
         for (int i = 0; i < genes.length; i++) {
             genes[i] = rand.nextInt(genes.length);
         }

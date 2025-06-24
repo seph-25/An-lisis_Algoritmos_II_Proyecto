@@ -1,4 +1,5 @@
 import java.text.MessageFormat;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,8 +16,11 @@ public class Main {
             System.out.println("\nGenético (Cruce uniforme):");
             new GeneticCore(n, 2,2);
 
-
-            System.out.println('\n'+String.valueOf('☰').repeat(30)+'\n');
+            System.out.println('\n'+String.valueOf('☰').repeat(50)+'\n');
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Presione Enter para continuar con el próximo valor de n");
+            sc.nextLine();
         }
     }
 }
+

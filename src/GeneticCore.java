@@ -5,23 +5,14 @@ public class GeneticCore {
     public GeneticCore(int n, int crossoverType,int mutationType){
         TimeMeter profiler = new TimeMeter();
         GeneticsParams geneticsParams = new GeneticsParams(
-                30,
-                60,
-                0.1,
-                10
+                n,
+                crossoverType,
+                mutationType
         );
 
         profiler.start();
 
-        GeneticSolver genSolver = new GeneticSolver(
-                n,
-                geneticsParams.populationSize(),
-                geneticsParams.generations(),
-                geneticsParams.mutationRate(),
-                geneticsParams.elitismCount(),
-                crossoverType,
-                mutationType
-        );
+        GeneticSolver genSolver = new GeneticSolver(geneticsParams);
         List<QueenChromosome> bestList = genSolver.solve();
 
         profiler.stop();
