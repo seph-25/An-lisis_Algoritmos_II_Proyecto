@@ -1,34 +1,35 @@
+import java.util.Arrays;
 import java.util.List;
 
 public class GeneticCore {
 
     public GeneticCore(int n, int crossoverType,int mutationType){
-        TimeMeter profiler = new TimeMeter();
-        GeneticsParams geneticsParams = new GeneticsParams(
-                n,
-                crossoverType,
-                mutationType
-        );
+        int[] generations = new int[]{1,10,15};
 
-        profiler.start();
+        for (int gen : generations) {
+            // 3 corridas requeridas
+            System.out.println("\n===  GENERACIONES: " + gen + "  ===");
 
-        GeneticSolver genSolver = new GeneticSolver(geneticsParams);
-        List<QueenChromosome> bestList = genSolver.solve();
+            GeneticsParams params = new GeneticsParams(
+                    n,crossoverType,mutationType,gen);
 
-        profiler.stop();
+            TimeMeter profiler = new TimeMeter();
+            profiler.start();
 
-        QueenChromosome best = bestList.getFirst();
-        System.out.println("Mejor solución genética (fitness " + best.getFitness() + "):");
-        Board genBoard = new Board(best.getGenes());
-        genBoard.printBoard();
-        System.out.println("Arreglo queens: " + java.util.Arrays.toString(best.getGenes()));
+            GeneticSolver solver = new GeneticSolver(params);
+            List<QueenChromosome> best3 = solver.solve();
 
-        for (int i = 1; i < bestList.size(); i++) {
-            QueenChromosome other = bestList.get(i);
-            System.out.println("Solución genética #" + (i+1) + " (fitness " + other.getFitness() + "):");
-            System.out.println("Arreglo queens: " + java.util.Arrays.toString(other.getGenes()));
+            profiler.stop();
+            QueenChromosome best = best3.getFirst();
+            System.out.println("Mejor fitness " + best.getFitness());
+            new Board(best.getGenes()).printBoard();
+
+            for (int i=1;i<best3.size();i++)
+                System.out.println("Sol " + (i+1)+": "
+                        + Arrays.toString(best3.get(i).getGenes())
+                        + " -> " + best3.get(i).getFitness());
+
+            profiler.printReport();
         }
-        System.out.println(genSolver.getMetrics());
-        profiler.printReport();
     }
 }

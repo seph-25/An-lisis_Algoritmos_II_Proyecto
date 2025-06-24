@@ -14,50 +14,47 @@ public class GeneticSolver {
 
     public List<QueenChromosome> solve() {
         List<QueenChromosome> population = initializePopulation();
-
-        for (int gen = 0; gen < params.generations(); gen++) {
+        for (int g=0; g<params.runsGenerations(); g++) {
             Collections.sort(population);
-
-            if (population.getFirst().getFitness() == 0) {
-                System.out.println("Solución encontrada en la generación: " + gen);
-                return new ArrayList<>(population.subList(0, Math.min(3, population.size())));
-            }
+            System.out.println("Generación " + (g+1) +
+                    "  mejor fitness = " +
+                    population.getFirst().getFitness());
+            if (population.getFirst().getFitness()==0) break;
             population = createNextGeneration(population);
         }
-
         Collections.sort(population);
-        return new ArrayList<>(population.subList(0, Math.min(3, population.size())));
+        return new ArrayList<>(population.subList(0,Math.min(3,population.size())));
     }
 
-    private List<QueenChromosome> createNextGeneration(List<QueenChromosome> currentPopulation) {
-        List<QueenChromosome> newPopulation = new ArrayList<>();
+    /* EXACTO número de hijos = popSize*2 */
+    private List<QueenChromosome> createNextGeneration(List<QueenChromosome> curr){
+        List<QueenChromosome> next = new ArrayList<>(curr.subList(0,params.elitismCount()));
 
-        for (int i = 0; i < params.elitismCount(); i++) {
-            newPopulation.add(currentPopulation.get(i));
-        }
+        int childrenNeeded = params.childrenPerGeneration();
+        List<QueenChromosome> children = new ArrayList<>();
 
-        while (newPopulation.size() < params.populationSize()) {
-            QueenChromosome[] parents = selectParents(currentPopulation);
-            QueenChromosome[] children = crossover(parents[0], parents[1]);
-            mutate(children[0]);
-            mutate(children[1]);
+        while (children.size() < childrenNeeded) {
+            QueenChromosome[] parents = selectParents(curr);
+            QueenChromosome[] offspring = crossover(parents[0],parents[1]);
+            mutate(offspring[0]);  mutate(offspring[1]);
+
+            children.add(offspring[0]);
+            if (children.size() < childrenNeeded) children.add(offspring[1]);
 
             String cruceInfo =
-                "Padre1 " + Arrays.toString(parents[0].getGenes()) + " puntuación " + parents[0].getFitness() + "\n" +
-                "Padre2 " + Arrays.toString(parents[1].getGenes()) + " puntuación " + parents[1].getFitness() + "\n" +
-                "Hijo1  " + Arrays.toString(children[0].getGenes()) + " puntuación " + children[0].getFitness() + "\n" +
-                "Hijo2  " + Arrays.toString(children[1].getGenes()) + " puntuación " + children[1].getFitness() + "\n";
+                    "Padre1 " + Arrays.toString(parents[0].getGenes()) + " fitness " + parents[0].getFitness() + "\n" +
+                    "Padre2 " + Arrays.toString(parents[1].getGenes()) + " fitness " + parents[1].getFitness() + "\n" +
+                    "Hijo1  " + Arrays.toString(offspring[0].getGenes()) + " fitness " + offspring[0].getFitness() + "\n" +
+                    "Hijo2  " + Arrays.toString(offspring[1].getGenes()) + " fitness " + offspring[1].getFitness() + "\n";
             System.out.println(cruceInfo);
 
-            newPopulation.add(children[0]);
-            newPopulation.add(children[1]);
         }
-        System.out.println("Población al final de la generación:");
-        for (QueenChromosome c : newPopulation) {
-            System.out.println(Arrays.toString(c.getGenes()) + " -> " + c.getFitness());
-        }
-        System.out.println("----");
-        return newPopulation;
+        curr.addAll(children);
+        Collections.sort(curr);
+        while (next.size() < params.populationSize())
+            next.add(curr.get(next.size()));
+
+        return next;
     }
 
     /**
@@ -97,7 +94,7 @@ public class GeneticSolver {
 
         // Torneo 1: selecciona el mejor de los primeros 'tournamentSize'
         List<QueenChromosome> tournament1 = shuffled.subList(0, tournamentSize);
-        QueenChromosome parent1 = Collections.max(tournament1);
+        QueenChromosome parent1 = Collections.min(tournament1);
 
         // Torneo 2: selecciona el mejor de los siguientes 'tournamentSize', excluyendo parent1
         List<QueenChromosome> tournament2 = new ArrayList<>();
@@ -110,75 +107,6 @@ public class GeneticSolver {
         // Si no hay suficientes, rellena con cualquier otro distinto, o repite parent1 si no hay opción
         if (tournament2.isEmpty()) tournament2.add(parent1);
 
-        QueenChromosome parent2 = Collections.max(tournament2);
-
-        return new QueenChromosome[]{parent1, parent2};
-    }
-
-    /*
-    ¿En qué estuve trabajando?
-
-    Estuve optimizando el metodo para seleccionar los padres para mejorar
-    la diversidad pero evitar candidatos repetidos a la hora de escoger los padres
-    y que sea robusto y evite ciclos infinitos, implementé el metodo que está abajo
-    de este comentario el cual asegura que no hayan padres duplicados, sin embargo, no
-    favorece a los mejores candidatos limitando la evolucion, el metodo de arriba de este comentario
-    fue una propuesta híbrida de mi metodo y el anterior que utilizaba torneos, parece prometer
-    robustez, diversidad y exclusividad de padres sin embargo aun no se ha probado.
-
-    Pendiente:
-    -Comprobar eficiencia de metodo selectParents
-    -Agregar medidores
-    -Documentación
-    Fecha de comentario: 24/06/2025 12:35 am muriéndome de sueño
-    */
-
-    private QueenChromosome[] selectParents(List<QueenChromosome> population) {
-        QueenChromosome parent1 = null ,parent2 = null;
-        Set<Integer> usedIndexes = new HashSet<>();
-        while (parent1 == null || parent2 == null){
-            int idx = this.rand.nextInt(population.size());
-            if (!usedIndexes.contains(idx)){
-                usedIndexes.add(idx);
-                if (parent1 == null){
-                    parent1 = population.get(idx);
-                }else {
-                    parent2 = population.get(idx);
-                    break;
-                }
-            }
-        }
-        return new QueenChromosome[]{parent1, parent2};
-    }
-
-    private QueenChromosome[] selectParent(List<QueenChromosome> population) {
-        int tournamentSize = Math.min(5, population.size());
-
-        //Torneo para e; primer padre (sin repetidos)
-        List<QueenChromosome> tournament1 = new ArrayList<>();
-        Set<Integer> usedIndexes = new HashSet<>();
-        while (tournament1.size() < tournamentSize) {
-            int idx = this.rand.nextInt(population.size());
-            if (!usedIndexes.contains(idx)){
-                tournament1.add(population.get(idx));
-                usedIndexes.add(idx);
-            }
-        }
-        QueenChromosome parent1 = Collections.min(tournament1);
-
-        tournamentSize -= 1;
-
-        //Torneo para segundo padre (sin repetidos y excluyendo el parent1)
-        List<QueenChromosome> tournament2 = new ArrayList<>();
-        usedIndexes = new HashSet<>();
-        while (tournament2.size() < tournamentSize) {
-            int idx = rand.nextInt(population.size());
-            QueenChromosome candidate = population.get(idx);
-            if (!usedIndexes.contains(idx) && !Arrays.equals(candidate.getGenes(), parent1.getGenes())) {
-                tournament2.add(candidate);
-                usedIndexes.add(idx);
-            }
-        }
         QueenChromosome parent2 = Collections.min(tournament2);
 
         return new QueenChromosome[]{parent1, parent2};
@@ -245,17 +173,18 @@ public class GeneticSolver {
         }
     }
 
-    private void mutateRandom(QueenChromosome chromosome) {
+    /* MUTACIÓN aleatoria con reversión si empeora */
+    private void mutateRandom(QueenChromosome chrom){
+        int prevFit = chrom.getFitness();
         int row = rand.nextInt(params.n_size());
         int col = rand.nextInt(params.n_size());
-        int[] genes = chromosome.getGenes();
-        int oldValue = genes[row];
-        genes[row] = col;
-        chromosome.setGenes(genes);
-        // Si no mejora el fitness, revierte
-        if (chromosome.getFitness() < 0) { // fitness negativo es peor
-            genes[row] = oldValue;
-            chromosome.setGenes(genes);
+        int[] g = chrom.getGenes();
+        int old = g[row];
+        g[row]=col;
+        chrom.setGenes(g);               // recalcula fitness
+        if (chrom.getFitness() < prevFit){ // ← revierte si PEOR
+            g[row]=old;
+            chrom.setGenes(g);
         }
     }
 
