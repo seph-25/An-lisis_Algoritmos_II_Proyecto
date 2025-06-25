@@ -7,7 +7,6 @@ public class GeneticCore {
         int[] generations = new int[]{1,10,15,20};
 
         for (int gen : generations) {
-            // 3 corridas requeridas
             System.out.println("\n===  GENERACIONES: " + gen + "  ===");
 
             GeneticsParams params = new GeneticsParams(
@@ -29,7 +28,6 @@ public class GeneticCore {
                         + Arrays.toString(best3.get(i).getGenes())
                         + " -> " + best3.get(i).getFitness());
             }
-            //System.out.println("Posición de columna de reina según su fila:\n" + Arrays.toString(solver.getQueens()));
             System.out.println(solver.getMetrics());
             profiler.printReport();
         }

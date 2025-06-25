@@ -41,17 +41,16 @@ public class QueenChromosome implements Comparable<QueenChromosome> {
                 }
             }
         }
-        this.fitness = -conflicts; // Fitness negativo: menos conflictos es mejor
+        this.fitness = -conflicts;
     }
-
-    // Añadir este metodo dentro de la clase QueenChromosome.java
+    
     public void setGenes(int[] genes) {
         this.genes = genes.clone();
-        evaluateFitness(); // ¡Importante! Recalcular el fitness después de la mutación.
+        evaluateFitness();
     }
 
     @Override
     public int compareTo(QueenChromosome other) {
-        return Integer.compare(other.fitness, this.fitness); // Mayor fitness es mejor
+        return Integer.compare(other.fitness, this.fitness);
     }
 }
