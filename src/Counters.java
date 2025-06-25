@@ -1,7 +1,7 @@
 public class Counters {
-    public int manualBits = 0;
-    public int assignments = 0;
-    public int comparisons = 0;
-    public int prunningCounter = 0;
-    public int mutationCounter = 0;
+    public long manualBits = 0;
+    public long assignments = 0;
+    public long comparisons = 0;
+    public long prunningCounter = 0;
+    public long mutationCounter = 0;
 }

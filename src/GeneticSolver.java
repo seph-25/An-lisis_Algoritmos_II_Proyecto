@@ -170,65 +170,67 @@ public class GeneticSolver {
         }
     }
 
-    private void mutate(QueenChromosome chromosome) {
-        if (rand.nextDouble() < params.mutationRate()) {
-            if (params.mutationType() == 1) {
-                mutateRandom(chromosome);
-            } else {
-                mutateSwapIfBetter(chromosome);
-            }
+    private void mutate(QueenChromosome chrom) {
+
+        if (rand.nextDouble() >= params.mutationRate()) return;
+
+        int[]  beforeGenes = chrom.getGenes().clone();
+        int    beforeFit   = chrom.getFitness();
+
+        if (params.mutationType() == 1)
+            mutateRandom(chrom);
+        else
+            mutateSwapIfBetter(chrom);
+
+        if (!Arrays.equals(beforeGenes, chrom.getGenes())) {
+            counters.mutationCounter++;
+            MutationLogger.log(beforeGenes, beforeFit,
+                    chrom.getGenes(),  chrom.getFitness());
         }
     }
 
     /* MUTACIÓN aleatoria con reversión si empeora */
     private void mutateRandom(QueenChromosome chrom){
-        int[] before = chrom.getGenes();
-        int beforeFitness  = chrom.getFitness();
-
-        counters.mutationCounter++;          // count mutation attempt
-        counters.assignments += 3;
-        counters.manualBits  += Integer.SIZE*3;
 
         int row = rand.nextInt(params.n_size());
         int col = rand.nextInt(params.n_size());
-        int[] g  = chrom.getGenes(); int old = g[row];
-        g[row] = col; chrom.setGenes(g);
 
-        if (chrom.getFitness() < beforeFitness && rand.nextDouble() < .60){
-            g[row] = old; chrom.setGenes(g);
-        }
-        else {
-            MutationLogger.log(before,beforeFitness,chrom.getGenes(),chrom.getFitness());
+        if (chrom.getGenes()[row] == col) return;
+
+        int[] g = chrom.getGenes();
+        int old = g[row];
+        g[row]  = col;  chrom.setGenes(g);
+
+        if (chrom.getFitness() < 0 && rand.nextDouble() < 0.60) {
+            g[row] = old;  chrom.setGenes(g);
         }
     }
 
-    private void mutateSwapIfBetter(QueenChromosome c){
-        int[] before = c.getGenes(); int beforeF = c.getFitness();
-        counters.mutationCounter++;
-
+    private void mutateSwapIfBetter(QueenChromosome chrom){
         int i = rand.nextInt(params.n_size());
         int j = rand.nextInt(params.n_size());
-        while(j==i) j = rand.nextInt(params.n_size());
+        if (i == j) return;
 
-        int[] g = c.getGenes();
+        int[] g = chrom.getGenes();
+        if (g[i] == g[j]) return;
+
+        int oldFit = chrom.getFitness();
         int tmp = g[i]; g[i] = g[j]; g[j] = tmp;
-        c.setGenes(g);
+        chrom.setGenes(g);
 
-        if (c.getFitness() < beforeF){          // revert if worse
+        /* revierte si empeora */
+        if (chrom.getFitness() < oldFit) {
             tmp = g[i]; g[i] = g[j]; g[j] = tmp;
-            c.setGenes(g);
-        }else{
-            MutationLogger.log(before,beforeF,c.getGenes(),c.getFitness());
+            chrom.setGenes(g);
         }
-
     }
 
     /*  mutación “fuerte” obligatoria (sólo se usa para romper duplicados) */
-    private void forceMutate(QueenChromosome c){
+    private void forceMutate(QueenChromosome chrom){
         int row = rand.nextInt(params.n_size());
         int col = rand.nextInt(params.n_size());
-        c.getGenes()[row] = col;
-        c.setGenes(c.getGenes());          // recalcula fitness
+        chrom.getGenes()[row] = col;
+        chrom.setGenes(chrom.getGenes());    // recalcula fitness
     }
 
     private boolean containsGenes(List<QueenChromosome> list, QueenChromosome q){
@@ -240,7 +242,7 @@ public class GeneticSolver {
     }
 
     public String getMetrics() {
-        int totalInstructions = counters.assignments + counters.comparisons;
+        long totalInstructions = counters.assignments + counters.comparisons;
         return String.format(
                 "Instrucciones ejecutadas: %d%n" +
                 "Asignaciones: %d%n" +

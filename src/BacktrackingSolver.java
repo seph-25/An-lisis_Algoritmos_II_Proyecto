@@ -56,7 +56,7 @@ public class BacktrackingSolver {
     }
 
     public String getMetrics() {
-        int totalInstructions = counters.assignments + counters.comparisons;
+        long totalInstructions = counters.assignments + counters.comparisons;
         return String.format(
                 "Instrucciones ejecutadas: %d%n" +
                 "Asignaciones: %d%n" +
